@@ -1,0 +1,22 @@
+{% for tweet in tweets %}
+   <div id="tweet_div_{{tweet.id}}" class="tweet_div">
+            <article class="tweet" tweetid="{{tweet.id}}" linked="">
+                    <b>ID</b> : <span id="span_tweet_id">{{tweet.id}}</span><br/>
+                    <b>Author</b> : <span id="span_author"> {{tweet.author}}</span><br/>
+                    <b>Date of creation</b> : <span id="span_date">{{tweet.created|date('d/m/Y H:i:s')}}</span><br/>
+                    <b>Content</b> :<br/>
+                    {{tweet.tweettext}}
+                    <br/>
+                    <br/>
+                    <button id = "button_tweet_{{tweet.id}}" class="btn btn-success btn_green" onclick="linkMe(this)">Link this tweet !</button>
+                    <button id = "button_tweet_{{tweet.id}}" class="btn btn-danger btn_red" style="display:none" onclick="unLinkMe(this)">Unlink this tweet...</button>
+                    <button id = "button_tweet_{{tweet.id}}" class="btn btn-danger btn_discard" onclick="discardMe(this)" >Not relevant to traffic !</button>
+                    <button id = "button_tweet_{{tweet.id}}" class="btn btn-success btn_undiscard" onclick="unDiscardMe(this)" style="display:none">Relevant to traffic !</button>
+            </article>
+          </div>
+        <br/>
+  {% else %}
+  <div class="well">
+   <p>Sorry, your query did not return any result. Please try with some other filter values.</p>
+  </div>
+{% endfor %}

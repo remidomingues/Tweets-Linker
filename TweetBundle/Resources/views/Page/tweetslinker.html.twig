@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>TweetsLinker</title>
+    <link rel="stylesheet" href="{{ asset('css/bootstrap.css') }}" />
+    <link rel="stylesheet" href="{{ asset('css/datepicker.css') }}" />
+    <link rel="stylesheet" href="{{ asset('css/timepicker.css') }}" />
+    <style type="text/css">
+     #tweets_container{
+        display:none;
+        position:relative;
+        z-index:5;
+        padding-top:25px;
+        padding-right:5px;
+     }
+
+     #tagged_tweet_container{
+        position:fixed;
+        height: 100%;
+        z-index:5;
+        padding-top:25px;
+        padding-left:5px;
+	overflow:auto;
+     }
+
+    .tweet_div{
+        position:relative;
+        padding: 19px 29px 29px;
+        background-color: #fff;
+        border: 1px solid #e5e5e5;
+        -webkit-border-radius: 5px;
+           -moz-border-radius: 5px;
+                border-radius: 5px;
+        -webkit-box-shadow: 0 1px 2px rgba(0,0,0,.05);
+           -moz-box-shadow: 0 1px 2px rgba(0,0,0,.05);
+                box-shadow: 0 1px 2px rgba(0,0,0,.05);
+        z-index:10;
+     }
+
+     .div_type {
+         display:none;
+     }
+
+     .div_time {
+         display:none;
+     }
+
+     .div_location {
+         display:none;
+     }
+
+     .div_link {
+         display:none;
+     }
+
+     .div_tagged {
+         display:none;
+     }
+
+     #logged_p {
+        padding-right:7px;
+     }
+
+     #map_div {
+        position:fixed;
+        width:100%;
+        height:100%;
+        top:0;
+        right:0;
+        z-index:0;
+      } 
+
+     #map_container {
+        position:absolute;
+        width:100%;
+        height:100%;
+      }
+
+     .type_mark {
+         background-color: #ef1b1b;
+     }
+
+     .location_mark {
+         background-color: #2850f0;
+     }
+
+     .time_mark {
+         background-color: #28f064;
+     }
+
+     #loader,#loader>img {
+        width:14px;
+     }
+
+     div.olControlZoom {
+       position:absolute !important;
+       left:auto !important;
+       top:44px !important;
+       right:8px;
+       width:27px;
+       height:47px;
+     }
+
+     .notification {
+	position:absolute;
+        z-index:5;
+        top:50px;
+     }
+
+     .timepicker-popup {
+       position:fixed !important;
+     }
+
+     [readonly="readonly"] {
+       cursor:default !important;
+       background-color:#ffffff !important;
+     }
+
+     #timefilter_div {
+       display:none;
+     }
+
+     </style>
+  </head>
+
+  <body>
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+          <div class="brand">TweetsLinker</div>
+          <form class="navbar-form pull-right">
+            <a class="btn btn-primary" onclick="location.href='logout';">Log out !</a>
+          </form>
+          <p id="logged_p" class="navbar-text pull-right">
+            Logged in as {{login}} 
+          </p>
+          <span style="display:none">{{userId}}</span>
+        </div>
+      </div>
+    </div>
+    <div id="map_div">
+      <div id="map_container"></div>
+    </div>
+
+  {{error}}<br/>
+  <div class="row-fluid">
+  <div id="tagged_tweet_container" class="span4">
+          <div id="tweet_div_{{randomTweet.id}}" class="tweet_div">
+            <article class="main_tweet" tweetid="{{randomTweet.id}}">
+                    {% if randomTweet is null %}
+                      <p><b>You already tagged all the available tweets.. Come back later !</b></p>
+                    {% else %}
+                    <div class='well article-well'>
+                      <b>ID</b> : <span id="span_tweet_id">{{randomTweet.id}}</span><br/>
+		      <b>Author</b> : <span id="span_author"> {{randomTweet.author}}</span><br/>
+		      <b>Date of creation</b> : <span id="span_date">{{randomTweet.created|date('d/m/Y H:i:s')}}</span><br/>
+		      <b>Content</b> :<br/>
+		      {{randomTweet.tweettext}}
+                    </div>
+                    <div id='div_relevant{{randomTweet.id}}' class='div_relevant'>
+                      <p><b>Is this a traffic related tweet?</b></p>
+                      <button id = "button_prev_{{randomTweet.id}}" class="btn btn-danger" onclick="notRelevant(this)">No...</button>
+                      <button id = "button_next_{{randomTweet.id}}" class="btn btn-success" onclick="toType(this)">Yes !</button>
+                      <button id = "button_next_{{randomTweet.id}}" class="btn btn-primary" onclick="doNotWant(this)">I don't know.</button>
+                    </div>
+
+                    <div id='div_type{{randomTweet.id}}' class='div_type'>
+                      <p><b>Highlight the type of event in the tweet</b></p>
+                      <button id = "button_next_{{randomTweet.id}}" class="btn btn-primary" onclick="highlight('type')">Validate Highlighted text !</button>
+                      <br/>
+                      <br/>
+                      <p><b>Choose a type for the Event !</b></p>
+                      <select id='input_type{{randomTweet.id}}' value='Event type'>
+                        {% for type in typeEvents %}
+                          <option id="{{type.id}}">{{type.typeEvent}}</option> 
+                        {% endfor %}
+                      </select>
+                      <br/>
+                      <button id = "button_prev_{{randomTweet.id}}" class="btn btn-danger" onclick="toRelevant(this)">Previous !</button>
+                      <button id = "button_next_{{randomTweet.id}}" class="btn btn-success" onclick="toLocation(this)">Next !</button>
+                    </div>
+
+                    <div id='div_location{{randomTweet.id}}' class='div_location'>
+                      <p><b>Highlight the location in the tweet</b></p>
+                      <button id = "button_next_{{randomTweet.id}}" class="btn btn-primary" onclick="highlight('location')">Validate Highlighted text !</button>
+                      <br/>
+                      <br/>
+                      <p><b>Tell us where it takes place !</b></p>
+                      <p>You can look for a specific location :</p>
+                      <div class="input-append">
+                      <input id='input_location{{randomTweet.id}}' type='text' placeholder='Event Location' class='input_location'/>
+                        <span class="add-on" onClick="getPositionOf(this.parentNode)">
+                        <i id="search_icon" class="icon-search"></i>
+                          <span id="loader" style="display:none;">
+                            <img src="img/loader.gif" alt="loading" />
+                          </span>
+                          <span id="search_infos">
+                          </span>
+                        </span>
+                        <br/>
+                      </div>
+                      <p>Then click on this button and draw a circle where the event takes place !</p>
+                      <button id = "button_next_{{randomTweet.id}}" class="btn btn-primary" onclick="drawOnMap(this)">Draw a circle on the map !</button>
+                      <br/>
+                      <br/>
+                      <button id = "button_prev_{{randomTweet.id}}" class="btn btn-danger" onclick="toType(this)">Previous !</button>
+                      <button id = "button_next_{{randomTweet.id}}" class="btn btn-success" onclick="toTime(this)">Next !</button>
+                    </div>
+
+                    <div id='div_time{{randomTweet.id}}' class='div_time'>
+                      <p><b>Highlight the time frame in the tweet</b></p>
+                      <button id = "button_next_{{randomTweet.id}}" class="btn btn-primary" onclick="highlight('time')">Validate Highlighted text !</button>
+                      <br/>
+                      <br/>
+                      <p><b>When does it begin ?</b></p>
+                      <div class='input-append date' id='datepicker_1_{{randomTweet.id}}' data-date='{{randomTweet.created|date('d/m/Y')}}' data-date-format='dd/mm/yyyy'>
+                        <input id='datepicker_1_input_{{randomTweet.id}}' onclick="showCalendar(this)" onfocus="this.blur()" size='16' type='text' value='{{randomTweet.created|date('d/m/Y')}}' readonly="readonly"/>
+                        <span class='add-on'><i class='icon-th'></i></span>
+                      </div>
+                      <input id='timepicker_1_{{randomTweet.id}}' type='text' value="{{randomTweet.created|date('H:i')}}" onclick="offsetPopup(this)" onfocus="simulateClick(this)" class='timepicker' readonly="readonly"/>
+                      <label  class="checkbox">
+                        <input id='start_datetime_use{{randomTweet.id}}' type="checkbox"/> Don't know... 
+                      </label>
+                      <br/>
+                      <p><b>When does it end ?</b></p>
+                      <div class='input-append date' id='datepicker_2_{{randomTweet.id}}' data-date='{{randomTweet.created|date('d/m/Y')}}' data-date-format='dd/mm/yyyy'>
+                        <input id='datepicker_2_input_{{randomTweet.id}}' type='text' onclick="showCalendar(this)" value='{{randomTweet.created|date('d/m/Y')}}' readonly="readonly"/>
+                        <span class='add-on'><i class='icon-th'></i></span>
+                      </div>
+                    <input id='timepicker_2_{{randomTweet.id}}' type='text'  value="{{randomTweet.created|date('H:i')}}" onclick="offsetPopup(this)" onfocus="simulateClick(this)" class='timepicker' readonly="readonly"/>
+                      <label class="checkbox">
+                        <input id='end_datetime_use{{randomTweet.id}}' type="checkbox"/> Don't know... 
+                      </label>
+                    <br/>
+                    <button id = "button_prev_{{randomTweet.id}}" class="btn btn-danger" onclick="toLocation(this)">Previous !</button>
+                    <button id = "button_next_to_link{{randomTweet.id}}" class="btn btn-success popover-btn1" onclick="toLink(this)">Next !</button>
+                    </div>
+                    <div id='div_link{{randomTweet.id}}' class='div_link'>
+                      <p><b>Link the related tweets ! (And feel free to use our nice filters)</b></p>
+                      <label  class="checkbox">
+                        <input id='input_use_timeframe_search{{randomTweet.id}}' onclick="toggleFilter()" type="checkbox"/> Use time filter ! 
+                      </label>
+                      <div id="timefilter_div">
+                      <p>Beginning of the time frame :</p>
+                      <div class='input-append date' id='datepicker_3_{{randomTweet.id}}' data-date='{{randomTweet.created|date('d/m/Y')}}' data-date-format='dd/mm/yyyy'>
+                         <input id='datepicker_3_input_{{randomTweet.id}}' size='16' type='text' onclick="showCalendar(this)" value='{{randomTweet.created|date('d/m/Y')}}' readonly="readonly"/>
+                        <span class='add-on'><i class='icon-th'></i></span>
+                      </div>
+                      <input id='timepicker_3_{{randomTweet.id}}' type='text' value="{{randomTweet.created|date('H:i')}}" onclick="offsetPopup(this)" onfocus="simulateClick(this)" class='timepicker' readonly="readonly"/>
+                      <br/>
+                      <p>End of the time frame :</p>
+                      <div class='input-append date' id='datepicker_4_{{randomTweet.id}}' data-date='{{randomTweet.created|date('d/m/Y')}}' data-date-format='dd/mm/yyyy'>
+                        <input id='datepicker_4_input_{{randomTweet.id}}' size='16' type='text' onclick="showCalendar(this)" value='{{randomTweet.created|date('d/m/Y')}}' readonly="readonly"/>
+                        <span class='add-on'><i class='icon-th'></i></span>
+                      </div>
+                      <input id='timepicker_4_{{randomTweet.id}}' type='text' value="{{randomTweet.created|date('H:i')}}" onclick="offsetPopup(this)" onfocus="simulateClick(this)" class='timepicker' readonly="readonly"/>
+                      </div>
+                      <input id='input_at{{randomTweet.id}}' type='text' placeholder='@User' class='input_at'/>
+                      <input id='input_hashtag{{randomTweet.id}}' type='text' placeholder='#Hashtag' class='input_hashtag'/>
+                      <input id='input_content{{randomTweet.id}}' type='text' placeholder='Content' class='input_content'/>
+                      <br/>
+                      <form  id="searchForm" action="{{path('tweetslist')}}" method="post" {{form_enctype(searchForm)}}>
+                        <button style="display:inline-block;" id = "button_refresh_{{randomTweet.id}}" class="btn btn-primary popover-btn2" onclick="toSearch(this)">Refresh the tweets !</button>
+                        <input id = "button_prev_{{randomTweet.id}}" type="button" class="btn btn-danger" value="Previous !" onclick="toTime(this)"/>
+                        {{form_rest(searchForm)}}
+                      </form>
+                      <form  id="tagForm" method="post" {{form_enctype(tagForm)}}>
+                        <button id = "button_next_{{randomTweet.id}}" class="btn btn-success" type="submit" onclick="toValidation(this)">Finish tagging this tweet !</button>
+                        {{form_rest(tagForm)}}
+                      </form>
+                    </div>
+                  {% endif %}
+            </article>
+          </div>
+        <br/>
+  </div>
+  {% if message != "" %}
+  <div class="notification alert alert-info span4 offset4">
+    <button type="button" class="close" data-dismiss="alert">&times;</button>
+	    {{message}}
+  </div>
+  {% endif %}
+  <div id="tweets_container" class="span4 pull-right">
+    {% include 'UCDTweetTweetBundle:Page:tweetslist.html.twig' %}
+  </div>
+  </div>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>window.jQuery || document.write('<script src="{{ asset('js/jquery.js') }}"><\/script>')</script>
+  <script src="{{ asset('js/bootstrap.js') }}"></script>
+  <script src="{{ asset('js/OpenLayers.js') }}" type="text/javascript"></script>
+  <script src="{{ asset('js/datepicker.js') }}" type="text/javascript"></script>
+  <script src="{{ asset('js/timepicker.js') }}" type="text/javascript"></script>
+  <script src="{{ asset('js/tweetslinker.js') }}" type="text/javascript" defer="defer"></script>
+  </body>
+</html>

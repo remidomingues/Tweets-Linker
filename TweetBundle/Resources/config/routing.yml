@@ -1,0 +1,28 @@
+homepage:
+    pattern: /
+    defaults: { _controller: UCDTweetTweetBundle:Page:login }
+
+login:
+    pattern:  /login
+    defaults: { _controller: UCDTweetTweetBundle:Page:login }
+
+loginCheck:
+    pattern:  /login_check
+
+signup:
+    pattern:  /signup
+    defaults: { _controller: UCDTweetTweetBundle:Page:signup }
+
+tweetslinker:
+    pattern:  /tweetslinker
+    defaults: { _controller: UCDTweetTweetBundle:Page:tweetslinker }
+
+tweetslist:
+    pattern:  /tweetslist
+    defaults: { _controller: UCDTweetTweetBundle:Page:tweetslinker }
+    requirements:
+        _method:  POST
+
+logout:
+    pattern:  /logout
+    defaults: { _controller: UCDTweetTweetBundle:Page:logout }

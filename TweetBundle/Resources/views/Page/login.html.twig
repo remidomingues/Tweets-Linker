@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>TweetsLinker - Home</title>
+    <link rel="stylesheet" href="{{ asset('css/bootstrap.css') }}" />
+  </head>
+
+  <body>
+    <div class="navbar navbar-inverse navbar-fixed-top">
+        <div class="navbar-inner">
+          <div class="container">
+            <div class="brand">TweetsLinker</div> 
+            <form class="navbar-form pull-right">
+              <button class="btn" type="button" onclick="location.href='signup';">Sign up !</button>
+            </form>
+          </div>
+        </div>
+    </div>
+
+    <div class="container">
+      <div class="hero-unit">
+      <h1>Sign in !</h1>
+        <br/>
+        {{error}}
+        <div class="row">
+          <div class="span4">
+            <div class="well">
+              <form method="post" {{ form_enctype(form) }}>
+                {{ form_widget(form) }}
+                <input type="submit" class="btn btn-primary" />
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="span4">
+          <h2>What is Tweetslinker?</h2>
+          <p class="justifier">
+              TweetsLinker is a Crowdsourcing annotation game which aims at gathering data about a tweets set related to traffic.
+              The goal is to be able to tag information such as a location, the time frame, the type of event described in the tweet... 
+              Of course it is also important to notice when several tweets reference the same event!
+          </p>
+        </div> 
+
+        <div class="span4">
+          <h2>I don't get the point...?</h2>
+          <p class="justifier">
+            This project is led by the <a href="http://www.lero.ie/project/traffic">TRAFFIC</a> division of the 
+            <a href="http://www.lero.ie/">LERO</a> research group, based in Dublin. TweetsLinker is part of a bigger research project involving natural
+            language processing and machine learning in order to automate the process that will be performed manually on this website.
+          </p>
+        </div> 
+
+        <div class="span4">
+          <h2>Seems pretty boring...</h2>
+          <p class="justifier">
+            But it worth a try ! Considering the accuracy and the number of tweets people have been tagging, we plan to reward the best
+            events highlighters ! The prize is not defined yet, so check this main page for future updates. May your links and tags be accurate !
+          </p>
+        </div> 
+    </div>
+  </div>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>window.jQuery || document.write('<script src="{{ asset('js/jquery.js') }}"><\/script>')</script>
+  <script src="{{ asset('js/bootstrap.js') }}"></script>
+  </body>
+</html>
